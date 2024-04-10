@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="">
+</head>
+<style>
+    /* @keyframes time {
+
+        0%,
+        100% {
+            text-shadow: 0 0 20px #fff, 0 0 100px #fff, 0 0 20px #fff;
+        }
+
+        50% {
+            text-shadow: 0 0 50px #fff, 0 0 150px #fff, 0 0 50px #fff;
+        }
+    } */
+
+    body {
+        /* width: 100%; */
+
+        font-family: "Segoe UI", "微軟正黑體", sans-serif;
+        margin: 0;
+        padding: 10px;
+        padding-left: 100px;
+        padding-right: 100px;
+        background-color: lightblue;
+        background-image: url(./image/下載\ \(6\).jpg);
+        /* background-repeat: no-repeat; */
+
+        /* backdrop-filter:blur(8px); */
+        /* background-size: cover; */
+        /* box-shadow: inset 0 2px 20px 0 #e0e5e8; */
+    }
+
+    .nav-btn {
+        padding: 5px;
+        margin: 5px;
+        cursor: pointer;
+        width: 30px;
+        height: 60px;
+        border: 1.5px solid rgb(109, 131, 172);
+        /* border: none; */
+        background-color: transparent;
+        border-radius: 50% 50% 50% 50%;
+        font-weight: 600;
+        color: rgb(109, 131, 172);
+        transform: translate(25px);
+        
+        /* display: flex; */
+
+
+    }
+
+
+
+    .nav-btn:hover {
+        background-color: rgb(109, 131, 172);
+        color: white;
+    }
+
+    .nav-btn:active {
+        background-color: rgb(80, 106, 114);
+    }
+
+    .card-region {
+        display: flex;
+        flex-wrap: wrap;
+        /* justify-content:space-between; */
+        padding: 20px;
+    }
+
+    .card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        margin: 10px;
+        padding: 15px;
+        width: 200px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+
+    }
+
+    .card:hover {
+        box-shadow: 0 2px 20px 0 #e0e5e8;
+        backdrop-filter: blur(8px);
+    }
+
+    .city {
+        display: block;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .time {
+        font-size: 18px;
+        letter-spacing: 5px;
+        font-style: italic;
+        /* text-decoration: underline; */
+        font-weight: 600;
+        position: absolute;
+        right: 100px;
+        bottom: 50px;
+        color: white;
+    }
+
+    #city1 {
+        font-size: 32px;
+    }
+
+    .time {
+        color: white;
+        /* font-size: 60px;； */
+        /* animation: time 1.5s ease-in-out infinite alternate; */
+    }
+</style>
+
+
+
+
+<body>
+
+    <button class="nav-btn">全省</button>
+    <button class="nav-btn">北部</button>
+    <button class="nav-btn">中部</button>
+    <button class="nav-btn">南部</button>
+    <button class="nav-btn">東部</button>
+    <button class="nav-btn">外島</button>
+    <div class="date"></div>
+
+
+    <div class="card-region">
+        <!-- <div class="card"></div>
+        <div class="card"></div>
+        <div class="card"></div>
+        <div class="card"></div>
+        <div class="card"></div> -->
+    </div>
+    <div class="time"></div>
+
+
+
+
+
+    <script>
+        let date = document.querySelectorAll('.date');
+        let btnAll = document.querySelectorAll('.nav-btn');
+
+
+        let cities = [
+            ['基隆市', '新北市', '臺北市', '桃園市', '新竹市', '新竹縣', '苗栗縣', '臺中市', '南投縣', '彰化縣', '雲林縣', '嘉義市', '嘉義縣', '臺南市',
+                '高雄市', '屏東縣', '宜蘭縣', '花蓮縣', '臺東縣', '澎湖縣', '金門縣', '連江縣'
+            ],
+            ['基隆市', '新北市', '臺北市', '桃園市', '新竹市', '新竹縣', '苗栗縣'],
+            ['臺中市', '南投縣', '彰化縣', '雲林縣', '嘉義市', '嘉義縣'],
+            ['臺南市', '高雄市', '屏東縣'],
+            ['宜蘭縣', '花蓮縣', '臺東縣'],
+            ['澎湖縣', '金門縣', '連江縣'],
+        ];
+
+
+        let nowCities = cities[0];
+        let orgData = {};
+
+
+        let url = 'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWA-B838660A-63D7-46A5-B21B-37F9546D4BC1';
+        fetch_data()
+
+        btnAll.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                console.log(999, index);
+                nowCities = cities[index];
+                fetch_data();
+            });
+        });
+
+        function fetch_data() {
+            fetch(url)
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (datas) {
+                    // console.log(datas);
+
+                    // 1. 組織資料
+                    organizationData(datas);
+
+                    // 2. 處理城市
+                    arrangeCites();
+
+                });
+        };
+
+
+        function organizationData(data) {
+            let locationAll = data.records.location
+            // console.log(locationAll);
+            locationAll.forEach(location => {
+                let locationName = location.locationName;
+                let loc_wE_t0 = location.weatherElement[0].time[0];
+                let wxCondition = loc_wE_t0.parameter.parameterName;
+                let startTime = loc_wE_t0.startTime;
+                let endTime = loc_wE_t0.endTime;
+                let maxT = location.weatherElement[4].time[0].parameter.parameterName;
+                let minT = location.weatherElement[2].time[0].parameter.parameterName;
+                let pop = location.weatherElement[1].time[0].parameter.parameterName;
+                let ci = location.weatherElement[3].time[0].parameter.parameterName;
+                orgData[locationName] = {
+                    'wxCondition': wxCondition,
+                    startTime: startTime,
+                    endTime: endTime,
+                    maxT: maxT,
+                    minT: minT,
+                    pop: pop,
+                    ci: ci,
+                }
+                // console.log(orgData);
+            })
+        };
+
+
+
+        function arrangeCites() {
+            let time = document.querySelector('.time');
+            let cardRegion = document.querySelector('.card-region');
+            cardRegion.innerHTML = '';
+            nowCities.forEach((city, index) => {
+                let cityData = orgData[city];
+                console.log(city, cityData);
+                cardRegion.innerHTML += `
+                <div class="card">
+                    <span class="city" id="city1"> ${city}  </span>
+                    <span class="city">  </span>
+                    <span class="city"> ${cityData.minT}°c ~ ${cityData.maxT}°c </span>
+                    <span class="city"> 降雨機率: ${cityData.pop}% </span>
+                    <span class="city"> ${cityData.ci} </span>
+                </div>
+                `;
+                time.innerHTML = 'Time:' + cityData.startTime + '~' + cityData.endTime;
+            })
+
+        };
+
+
+
+    </script>
+
+
+
+
+</body>
+
+</html>
